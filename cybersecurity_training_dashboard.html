@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Training Dashboard: Password Cracking Modules</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#090d16',
+                            card: '#111827',
+                            border: '#1f2937',
+                            cyan: '#06b6d4',
+                            green: '#10b981',
+                            greenHover: '#059669',
+                            yellow: '#f59e0b',
+                            red: '#ef4444',
+                            text: '#e2e8f0',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #090d16; color: #e2e8f0; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .glow-cyan { text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+        .glow-green { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-cyber-bg text-cyber-text">
+
+    <!-- Top Header & Navigation -->
+    <header class="border-b border-cyber-border bg-cyber-card/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-cyan-950 border border-cyber-cyan rounded-lg text-cyber-cyan glow-cyan">
+                    <i class="fa-solid fa-terminal text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-mono font-bold text-lg tracking-wider text-white">SEC-OPS // <span class="text-cyber-cyan">PASSWORD CRACKING SIMULATOR</span></h1>
+                    <p class="text-xs text-cyber-muted">Interactive Module Suite: Plaintext, Hashes, & Salts</p>
+                </div>
+            </div>
+
+            <!-- Level Navigation Tabs -->
+            <div class="flex items-center bg-cyber-bg p-1.5 rounded-xl border border-cyber-border space-x-1">
+                <button onclick="switchLevel(1)" id="tab-lvl1" class="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all flex items-center space-x-2 bg-cyber-cyan text-slate-950 shadow-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>LEVEL 1: BASE64</span>
+                    <span id="badge-lvl1" class="ml-1 px-1.5 py-0.2 bg-black/30 rounded-full text-[10px]">0/10</span>
+                </button>
+                <button onclick="switchLevel(2)" id="tab-lvl2" class="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all flex items-center space-x-2 text-cyber-muted hover:text-white">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <span>LEVEL 2: HASHES</span>
+                    <span id="badge-lvl2" class="ml-1 px-1.5 py-0.2 bg-cyber-border rounded-full text-[10px]">0/10</span>
+                </button>
+                <button onclick="switchLevel(3)" id="tab-lvl3" class="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all flex items-center space-x-2 text-cyber-muted hover:text-white">
+                    <i class="fa-solid fa-key"></i>
+                    <span>LEVEL 3: SALTS</span>
+                    <span id="badge-lvl3" class="ml-1 px-1.5 py-0.2 bg-cyber-border rounded-full text-[10px]">0/5</span>
+                </button>
+            </div>
+
+            <!-- Instructor Debug Toggle -->
+            <button onclick="toggleDebugDrawer()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-cyber-border text-cyber-yellow rounded-lg text-xs font-mono flex items-center space-x-2 transition">
+                <i class="fa-solid fa-bug"></i>
+                <span>Instructor Panel</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto w-full flex-grow p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 my-2">
+
+        <!-- Left Column: Scenario & Instructions -->
+        <div class="lg:col-span-1 flex flex-col space-y-6">
+            <!-- Scenario Card -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl"></div>
+                <div class="flex items-center space-x-2 text-cyber-cyan mb-3">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h2 class="font-mono font-bold text-sm tracking-wide uppercase" id="scenario-title">Module 1: Plaintext & Base64</h2>
+                </div>
+                <p class="text-xs text-cyber-muted leading-relaxed mb-4" id="scenario-desc">
+                    You have breached LegacyCorp. They claim their database is secure because they use 'advanced encoding'. Analyze the database leak and wordlist to compromise all 10 accounts.
+                </p>
+                <div class="bg-cyber-bg p-3 rounded-lg border border-cyber-border font-mono text-[11px] space-y-1 text-slate-300" id="scenario-objective">
+                    <div class="text-cyber-green font-bold"><i class="fa-solid fa-bullseye mr-1"></i> Objective:</div>
+                    <div>Compromise all 10 user accounts by submitting correct passwords.</div>
+                </div>
+            </div>
+
+            <!-- Quick Action Toolbar -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-xl flex flex-col space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs font-bold text-cyber-muted uppercase tracking-wider">Quick Commands</span>
+                    <span class="text-[10px] text-cyber-cyan font-mono">Click to execute</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 font-mono text-xs" id="quick-action-buttons">
+                    <button onclick="executeCommand('db')" class="p-2 bg-slate-800/80 hover:bg-slate-800 border border-cyber-border rounded-lg text-left transition flex items-center space-x-2 text-cyan-400">
+                        <i class="fa-solid fa-database w-4"></i>
+                        <span>View DB</span>
+                    </button>
+                    <button onclick="executeCommand('words')" class="p-2 bg-slate-800/80 hover:bg-slate-800 border border-cyber-border rounded-lg text-left transition flex items-center space-x-2 text-emerald-400">
+                        <i class="fa-solid fa-list w-4"></i>
+                        <span>View Wordlist</span>
+                    </button>
+                    <button onclick="executeCommand('table')" id="btn-table" class="p-2 bg-slate-800/80 hover:bg-slate-800 border border-cyber-border rounded-lg text-left transition flex items-center space-x-2 text-yellow-400">
+                        <i class="fa-solid fa-table w-4"></i>
+                        <span>Rainbow Table</span>
+                    </button>
+                    <button onclick="executeCommand('help')" class="p-2 bg-slate-800/80 hover:bg-slate-800 border border-cyber-border rounded-lg text-left transition flex items-center space-x-2 text-purple-400">
+                        <i class="fa-solid fa-circle-question w-4"></i>
+                        <span>Help Guide</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Command Syntax Helper -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-xl">
+                <span class="font-mono text-xs font-bold text-cyber-muted uppercase tracking-wider block mb-3">Syntax Helper</span>
+                <div class="space-y-2 text-xs font-mono text-slate-300" id="syntax-helper-list">
+                    <div class="p-2 bg-cyber-bg rounded border border-cyber-border">
+                        <span class="text-cyber-cyan">search &lt;word&gt;</span>
+                        <div class="text-[10px] text-cyber-muted">Scan DB for plaintext/Base64 passwords.</div>
+                    </div>
+                    <div class="p-2 bg-cyber-bg rounded border border-cyber-border">
+                        <span class="text-cyber-green">decode &lt;string&gt;</span>
+                        <div class="text-[10px] text-cyber-muted">Manually decode Base64 strings.</div>
+                    </div>
+                    <div class="p-2 bg-cyber-bg rounded border border-cyber-border">
+                        <span class="text-yellow-400">username:password</span>
+                        <div class="text-[10px] text-cyber-muted">Submit crack attempt (e.g., alice:qwerty).</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Data Display & Terminal Console -->
+        <div class="lg:col-span-2 flex flex-col space-y-6">
+            
+            <!-- Data Visualization Container (Tables & Wordlists) -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-xl flex flex-col h-[420px] overflow-hidden">
+                <div class="flex items-center justify-between pb-3 border-b border-cyber-border mb-3">
+                    <div class="flex items-center space-x-2 font-mono text-xs font-bold text-slate-200">
+                        <i class="fa-solid fa-server text-cyber-cyan"></i>
+                        <span id="view-panel-title">STOLEN DATABASE LEAK (LegacyCorp)</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="setViewMode('db')" id="btn-view-db" class="px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition">Database</button>
+                        <button onclick="setViewMode('words')" id="btn-view-words" class="px-2.5 py-1 bg-slate-800 border border-cyber-border text-cyber-muted rounded text-[11px] font-mono transition">Wordlist</button>
+                        <button onclick="setViewMode('table')" id="btn-view-table" class="px-2.5 py-1 bg-slate-800 border border-cyber-border text-cyber-muted rounded text-[11px] font-mono transition hidden">Rainbow Table</button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Data Area -->
+                <div class="flex-grow overflow-y-auto pr-1 font-mono text-xs" id="data-display-container">
+                    <!-- Dynamically injected tables or wordlists -->
+                </div>
+            </div>
+
+            <!-- Terminal Console & Input Area -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-xl flex flex-col h-[280px]">
+                <div class="flex items-center justify-between pb-2 border-b border-cyber-border mb-3">
+                    <div class="flex items-center space-x-2 font-mono text-xs text-cyber-green">
+                        <i class="fa-solid fa-terminal animate-pulse"></i>
+                        <span>SEC-OPS INTERACTIVE TERMINAL</span>
+                    </div>
+                    <button onclick="clearTerminal()" class="text-[10px] font-mono text-cyber-muted hover:text-white transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Clear Log
+                    </button>
+                </div>
+
+                <!-- Terminal Output Log -->
+                <div id="terminal-output" class="flex-grow overflow-y-auto font-mono text-xs space-y-1.5 pr-2 mb-3 bg-cyber-bg p-3 rounded-lg border border-cyber-border/80 text-slate-300">
+                    <div class="text-cyber-cyan">[*] Initializing secure connection to target infrastructure...</div>
+                    <div class="text-cyber-cyan">[*] Bypassing external firewall... SUCCESS</div>
+                    <div class="text-emerald-400">[+] Training environment loaded successfully. Type 'help' or click quick actions.</div>
+                </div>
+
+                <!-- Terminal Input Form -->
+                <form onsubmit="handleTerminalSubmit(event)" class="flex items-center space-x-2">
+                    <div class="relative flex-grow">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center font-mono text-cyber-cyan text-xs font-bold" id="terminal-prompt-prefix">
+                            [LegacyCorp] &gt;
+                        </span>
+                        <input type="text" id="terminal-input" autocomplete="off" placeholder="Type command (e.g. alice:qwerty, search, help)..." class="w-full bg-cyber-bg border border-cyber-border rounded-lg pl-36 pr-4 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-cyber-cyan transition">
+                    </div>
+                    <button type="submit" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded-lg shadow-lg transition flex items-center space-x-1">
+                        <span>EXEC</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Instructor / Debug Drawer Modal -->
+    <div id="debug-drawer" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+        <div class="bg-cyber-card border border-cyber-border rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-cyber-border flex items-center justify-between bg-slate-900/50">
+                <div class="flex items-center space-x-2 font-mono text-sm font-bold text-cyber-yellow">
+                    <i class="fa-solid fa-bug"></i>
+                    <span>INSTRUCTOR DEBUG & ANSWER KEY SHEET</span>
+                </div>
+                <button onclick="toggleDebugDrawer()" class="text-cyber-muted hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 font-mono text-xs" id="debug-drawer-content">
+                <!-- Dynamically populated answer key -->
+            </div>
+            <div class="px-6 py-3 border-t border-cyber-border bg-slate-900/50 flex items-center justify-between">
+                <span class="text-[11px] text-cyber-muted font-mono">Testing shortcut: Auto-solves current active level.</span>
+                <button onclick="executeCommand('solve'); toggleDebugDrawer();" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-mono text-xs font-bold rounded-lg transition flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Auto-Solve Level</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal Notification -->
+    <div id="success-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cyber-card border border-emerald-500/50 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
+            <div class="w-16 h-16 bg-emerald-950/80 border border-emerald-500 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl glow-green shadow-xl">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            <h3 class="font-mono font-bold text-lg text-white mb-1" id="success-modal-title">LEVEL COMPLETED!</h3>
+            <p class="text-xs text-cyber-muted mb-6 leading-relaxed" id="success-modal-desc">
+                Congratulations! You successfully bypassed security controls and compromised all targeted accounts.
+            </p>
+            <div class="flex space-x-3">
+                <button onclick="closeSuccessModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded-xl transition">
+                    Continue Exploring
+                </button>
+                <button onclick="advanceNextLevel()" id="btn-next-level" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded-xl shadow-lg transition">
+                    Next Level <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-cyber-border bg-cyber-card/40 py-3 text-center text-xs text-cyber-muted font-mono">
+        SEC-OPS Training Platform // Educational Cybersecurity Simulator (Authorized Lab Use Only)
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- Application State ---
+        let currentLevel = 1;
+        let viewMode = 'db'; // 'db', 'words', 'table'
+
+        // Level 1 State
+        const l1Passwords = ["password123", "admin", "qwerty", "letmein", "dragon", "football", "monkey", "shadow", "trustno1", "secret"];
+        const l1Users = ["alice", "bob", "charlie", "diana", "evan", "frank", "grace", "hank", "irene", "jack"];
+        let l1State = { targets: {}, dbData: {}, recovered: new Set() };
+
+        // Level 2 State
+        const l2Passwords = ["password123", "admin123", "letmein", "sunshine", "iloveyou", "secret", "password123", "dragon", "football", "letmein"];
+        const l2Users = ["alice", "bob", "charlie", "diana", "evan", "frank", "grace", "hank", "irene", "jack"];
+        const l2Algorithms = ["md5", "sha1", "sha256", "sha3_256"];
+        let l2State = { targets: {}, dbData: {}, precomputedTable: [], recovered: {} };
+
+        // Level 3 State
+        const l3Profiles = [
+            ("alice", "password123", "Classic lazy password (SHA-256)"),
+            ("bob", "admin123", "Default IT credentials (MD5)"),
+            ("charlie", "letmein", "Doorway / Access phrase"),
+            ("diana", "sunshine", "Weather / Sky phenomenon"),
+            ("evan", "iloveyou", "Three-word phrase (no spaces)"),
+            ("frank", "admin123", "Default IT credentials (MD5)"),
+            ("grace", "password123", "Classic lazy password (SHA-256)"),
+            ("hank", "dragon", "Real or mythical creature"),
+            ("irene", "football", "Popular stadium sport"),
+            ("jack", "letmein", "Doorway / Access phrase")
+        ];
+        const l3CandidateWordlist = [
+            "password123", "admin123", "welcome123",
+            "letmein", "welcome", "openup",
+            "sunshine", "thunder", "rainbow",
+            "iloveyou", "trustno1",
+            "secret", "classified", "private",
+            "dragon", "monkey", "falcon",
+            "football", "baseball", "soccer"
+        ];
+        let l3State = { targets: {}, dbData: {}, recovered: {}, goal: 5 };
+
+        // --- Initialization on Load ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initLevel1();
+            initLevel2();
+            initLevel3();
+            renderCurrentView();
+        });
+
+        // --- Level Initialization Functions ---
+        function initLevel1() {
+            let shuffled = [...l1Passwords].sort(() => Math.random() - 0.5);
+            l1State.targets = {};
+            l1State.dbData = {};
+            l1State.recovered = new Set();
+
+            l1Users.forEach((u, i) => {
+                let pwd = shuffled[i];
+                l1State.targets[u] = pwd;
+                if (Math.random() < 0.5) {
+                    l1State.dbData[u] = { stored_value: pwd, type: "plaintext" };
+                } else {
+                    let b64 = btoa(pwd);
+                    l1State.dbData[u] = { stored_value: b64, type: "base64" };
+                }
+            });
+        }
+
+        function initLevel2() {
+            let shuffled = [...l2Passwords].sort(() => Math.random() - 0.5);
+            l2State.targets = {};
+            l2State.dbData = {};
+            l2State.recovered = {};
+
+            l2Users.forEach((u, i) => {
+                let pwd = shuffled[i];
+                let algo = l2Algorithms[Math.floor(Math.random() * l2Algorithms.length)];
+                let h = hashString(algo, pwd);
+                l2State.targets[u] = pwd;
+                l2State.dbData[u] = { hash: h, algo: algo };
+            });
+
+            // Precomputed rainbow table
+            let algoGroups = [["MD5", "md5"], ["SHA-1", "sha1"], ["SHA-256", "sha256"], ["SHA3-256", "sha3_256"]];
+            l2State.precomputedTable = [];
+            let candidateList = [...new Set(l2Passwords), "monkey", "baseball", "123456"];
+            algoGroups.forEach(([disp, key]) => {
+                let groupWords = [...candidateList].sort(() => Math.random() - 0.5);
+                let rows = groupWords.map(w => [hashString(key, w), w]);
+                l2State.precomputedTable.push([disp, rows]);
+            });
+        }
+
+        function initLevel3() {
+            let profiles = [
+                ["alice", "password123", "Classic lazy password (SHA-256)"],
+                ["bob", "admin123", "Default IT credentials (MD5)"],
+                ["charlie", "letmein", "Doorway / Access phrase"],
+                ["diana", "sunshine", "Weather / Sky phenomenon"],
+                ["evan", "iloveyou", "Three-word phrase (no spaces)"],
+                ["frank", "admin123", "Default IT credentials (MD5)"],
+                ["grace", "password123", "Classic lazy password (SHA-256)"],
+                ["hank", "dragon", "Real or mythical creature"],
+                ["irene", "football", "Popular stadium sport"],
+                ["jack", "letmein", "Doorway / Access phrase"]
+            ];
+
+            l3State.targets = {};
+            l3State.dbData = {};
+            l3State.recovered = {};
+
+            profiles.forEach(([u, pwd, clue]) => {
+                let algo = (u === "alice" || u === "grace") ? "sha256" : ((u === "bob" || u === "frank") ? "md5" : ["md5", "sha1", "sha256", "sha3_256"][Math.floor(Math.random()*4)]);
+                let salt = Math.random().toString(16).substring(2, 6);
+                let payload = salt + pwd;
+                let h = hashString(algo, payload);
+                l3State.targets[u] = pwd;
+                l3State.dbData[u] = { hash: h, algo: algo, salt: salt, clue: clue };
+            });
+        }
+
+        // --- Helper Hash Function ---
+        function hashString(algo, str) {
+            // Simplified cryptographic simulation or basic hex hashing
+            // For robust client-side demo, we use a deterministic hash representation or MD5/SHA simulation
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            // Generate realistic hex length based on algo
+            let hex = Math.abs(hash).toString(16);
+            while (hex.length < 8) hex += '0';
+            if (algo === 'md5') return (hex + hex + hex + hex).substring(0, 32);
+            if (algo === 'sha1') return (hex + hex + hex + hex + hex).substring(0, 40);
+            return (hex + hex + hex + hex + hex + hex + hex + hex).substring(0, 64);
+        }
+
+        // --- Navigation & UI Switcher ---
+        function switchLevel(lvl) {
+            currentLevel = lvl;
+            viewMode = 'db';
+
+            // Update Tabs
+            for (let i = 1; i <= 3; i++) {
+                let btn = document.getElementById(`tab-lvl{i}`.replace('{i}', i));
+                if (i === lvl) {
+                    btn.className = "px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all flex items-center space-x-2 bg-cyber-cyan text-slate-950 shadow-lg";
+                } else {
+                    btn.className = "px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all flex items-center space-x-2 text-cyber-muted hover:text-white";
+                }
+            }
+
+            // Update UI elements based on level
+            let scenarioTitle = document.getElementById('scenario-title');
+            let scenarioDesc = document.getElementById('scenario-desc');
+            let scenarioObj = document.getElementById('scenario-objective');
+            let promptPrefix = document.getElementById('terminal-prompt-prefix');
+            let btnTable = document.getElementById('btn-table');
+            let btnViewTable = document.getElementById('btn-view-table');
+
+            if (lvl === 1) {
+                scenarioTitle.innerText = "Module 1: Plaintext & Base64";
+                scenarioDesc.innerText = "You have breached LegacyCorp. They claim their database is secure because they use 'advanced encoding'. Analyze the database leak and wordlist to compromise all 10 accounts.";
+                scenarioObj.innerHTML = '<div class="text-cyber-green font-bold"><i class="fa-solid fa-bullseye mr-1"></i> Objective:</div><div>Compromise all 10 user accounts.</div>';
+                promptPrefix.innerText = "[LegacyCorp] >";
+                btnTable.classList.add('hidden');
+                btnViewTable.classList.add('hidden');
+            } else if (lvl === 2) {
+                scenarioTitle.innerText = "Module 2: Unsalted Fast Hashes";
+                scenarioDesc.innerText = "FastHash Inc leaked a database of 10 user accounts using MD5, SHA-1, SHA-256, and SHA3-256 without salts. Leverage the precomputed rainbow table or active hashing.";
+                scenarioObj.innerHTML = '<div class="text-cyber-green font-bold"><i class="fa-solid fa-bullseye mr-1"></i> Objective:</div><div>Compromise all 10 user accounts and spot equality leaks.</div>';
+                promptPrefix.innerText = "[FastHash] >";
+                btnTable.classList.remove('hidden');
+                btnViewTable.classList.remove('hidden');
+            } else if (lvl === 3) {
+                scenarioTitle.innerText = "Module 3: Salted Hashes & Hints";
+                scenarioDesc.innerText = "SecureHash Ltd added unique per-user salts. Rainbow tables fail, but password hints leaked. Read clues, test candidate words with salts, and recover at least 5 accounts.";
+                scenarioObj.innerHTML = '<div class="text-cyber-green font-bold"><i class="fa-solid fa-bullseye mr-1"></i> Objective:</div><div>Recover at least 5 out of 10 user accounts.</div>';
+                promptPrefix.innerText = "[SecureHash] >";
+                btnTable.classList.remove('hidden');
+                btnViewTable.classList.remove('hidden');
+            }
+
+            updateBadges();
+            renderCurrentView();
+            appendTerminal(`[*] Switched to Level ${lvl}.`, 'text-cyber-cyan');
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            renderCurrentView();
+        }
+
+        function updateBadges() {
+            let b1 = document.getElementById('badge-lvl1');
+            let b2 = document.getElementById('badge-lvl2');
+            let b3 = document.getElementById('badge-lvl3');
+
+            b1.innerText = `${l1State.recovered.size}/10`;
+            b2.innerText = `${Object.keys(l2State.recovered).length}/10`;
+            b3.innerText = `${Object.keys(l3State.recovered).length}/5`;
+        }
+
+        // --- Render Views (Tables & Wordlists) ---
+        function renderCurrentView() {
+            let container = document.getElementById('data-display-container');
+            let panelTitle = document.getElementById('view-panel-title');
+            let btnDb = document.getElementById('btn-view-db');
+            let btnWords = document.getElementById('btn-view-words');
+            let btnTable = document.getElementById('btn-view-table');
+
+            // Reset tab highlights
+            btnDb.className = "px-2.5 py-1 bg-slate-800 border border-cyber-border text-cyber-muted rounded text-[11px] font-mono transition";
+            btnWords.className = "px-2.5 py-1 bg-slate-800 border border-cyber-border text-cyber-muted rounded text-[11px] font-mono transition";
+            if(btnTable) btnTable.className = "px-2.5 py-1 bg-slate-800 border border-cyber-border text-cyber-muted rounded text-[11px] font-mono transition";
+
+            if (currentLevel === 1) {
+                if (viewMode === 'db') {
+                    btnDb.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "STOLEN DATABASE LEAK (LegacyCorp)";
+                    let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-cyber-border text-cyber-muted"><th class="py-2 px-3">USERNAME</th><th class="py-2 px-3">STORED CREDENTIAL</th><th class="py-2 px-3">STATUS</th></tr></thead><tbody>`;
+                    for (let [user, info] of Object.entries(l1State.dbData)) {
+                        let compromised = l1State.recovered.has(user);
+                        html += `<tr class="border-b border-cyber-border/50 hover:bg-slate-900/40"><td class="py-2 px-3 font-bold text-white">${user}</td><td class="py-2 px-3 font-mono text-cyan-400">${info.stored_value}</td><td class="py-2 px-3">${compromised ? '<span class="text-emerald-400 font-bold">[COMPROMISED]</span>' : '<span class="text-slate-500">SECURE</span>'}</td></tr>`;
+                    }
+                    html += `</tbody></table>`;
+                    container.innerHTML = html;
+                } else if (viewMode === 'words') {
+                    btnWords.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "INTERCEPTED WORDLIST (rockyou_mini.txt)";
+                    container.innerHTML = `<div class="p-4 bg-cyber-bg rounded-lg border border-cyber-border text-emerald-400 leading-relaxed">${l1Passwords.join(', ')}</div>`;
+                }
+            } else if (currentLevel === 2) {
+                if (viewMode === 'db') {
+                    btnDb.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "STOLEN DATABASE LEAK (FastHash Inc)";
+                    let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-cyber-border text-cyber-muted"><th class="py-2 px-3">USERNAME</th><th class="py-2 px-3">ALGO</th><th class="py-2 px-3">STORED HASH VALUE</th><th class="py-2 px-3">STATUS</th></tr></thead><tbody>`;
+                    for (let [user, info] of Object.entries(l2State.dbData)) {
+                        let compromised = l2State.recovered[user];
+                        html += `<tr class="border-b border-cyber-border/50 hover:bg-slate-900/40"><td class="py-2 px-3 font-bold text-white">${user}</td><td class="py-2 px-3 text-yellow-400 uppercase">${info.algo}</td><td class="py-2 px-3 font-mono text-cyan-400 text-[10px] truncate max-w-xs">${info.hash}</td><td class="py-2 px-3">${compromised ? '<span class="text-emerald-400 font-bold">[COMPROMISED]</span>' : '<span class="text-slate-500">SECURE</span>'}</td></tr>`;
+                    }
+                    html += `</tbody></table>`;
+                    container.innerHTML = html;
+                } else if (viewMode === 'words') {
+                    btnWords.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "CANDIDATE PASSWORD WORDLIST";
+                    container.innerHTML = `<div class="p-4 bg-cyber-bg rounded-lg border border-cyber-border text-emerald-400 leading-relaxed">${l2Passwords.join(', ')}</div>`;
+                } else if (viewMode === 'table') {
+                    btnTable.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "PRECOMPUTED RAINBOW LOOKUP TABLE";
+                    let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-cyber-border text-cyber-muted"><th class="py-2 px-3">ALGO</th><th class="py-2 px-3">HASH VALUE</th><th class="py-2 px-3">PLAINTEXT</th></tr></thead><tbody>`;
+                    l2State.precomputedTable.forEach(([disp, rows]) => {
+                        rows.forEach(([h, p]) => {
+                            html += `<tr class="border-b border-cyber-border/50 hover:bg-slate-900/40"><td class="py-2 px-3 text-yellow-400">${disp}</td><td class="py-2 px-3 font-mono text-cyan-400 text-[10px] truncate max-w-xs">${h}</td><td class="py-2 px-3 text-emerald-400 font-bold">${p}</td></tr>`;
+                        });
+                    });
+                    html += `</tbody></table>`;
+                    container.innerHTML = html;
+                }
+            } else if (currentLevel === 3) {
+                if (viewMode === 'db') {
+                    btnDb.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "STOLEN DATABASE LEAK (SecureHash Ltd)";
+                    let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-cyber-border text-cyber-muted"><th class="py-2 px-3">USER</th><th class="py-2 px-3">ALGO</th><th class="py-2 px-3">SALT</th><th class="py-2 px-3">HASH (32 CHARS)</th><th class="py-2 px-3">PASSWORD HINT</th></tr></thead><tbody>`;
+                    for (let [user, info] of Object.entries(l3State.dbData)) {
+                        let compromised = l3State.recovered[user];
+                        let statusText = compromised ? '<span class="text-emerald-400 font-bold">[CRACKED]</span>' : info.clue;
+                        html += `<tr class="border-b border-cyber-border/50 hover:bg-slate-900/40"><td class="py-2 px-3 font-bold text-white">${user}</td><td class="py-2 px-3 text-yellow-400 uppercase">${info.algo}</td><td class="py-2 px-3 font-mono text-purple-400">${info.salt}</td><td class="py-2 px-3 font-mono text-cyan-400 text-[10px]">${info.hash.substring(0,32)}...</td><td class="py-2 px-3 text-slate-300">${statusText}</td></tr>`;
+                    }
+                    html += `</tbody></table>`;
+                    container.innerHTML = html;
+                } else if (viewMode === 'words') {
+                    btnWords.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "CANDIDATE PASSWORD WORDLIST";
+                    container.innerHTML = `<div class="p-4 bg-cyber-bg rounded-lg border border-cyber-border text-emerald-400 leading-relaxed">${l3CandidateWordlist.join(', ')}</div>`;
+                } else if (viewMode === 'table') {
+                    btnTable.className = "px-2.5 py-1 bg-cyan-950 border border-cyber-cyan text-cyber-cyan rounded text-[11px] font-mono transition";
+                    panelTitle.innerText = "PRECOMPUTED RAINBOW LOOKUP TABLE (Unsalted - Defeated)";
+                    container.innerHTML = `<div class="p-4 bg-cyber-bg rounded-lg border border-cyber-border text-red-400 leading-relaxed">Notice: Standard unsalted rainbow tables fail completely here because per-user salts alter the hash output!</div>`;
+                }
+            }
+        }
+
+        // --- Terminal Execution Engine ---
+        function handleTerminalSubmit(e) {
+            e.preventDefault();
+            let inputField = document.getElementById('terminal-input');
+            let cmd = inputField.value.trim();
+            if (!cmd) return;
+
+            appendTerminal(`> ${cmd}`, 'text-white font-bold');
+            inputField.value = '';
+            executeCommand(cmd);
+        }
+
+        function executeCommand(rawCmd) {
+            let cmd = rawCmd.trim().toLowerCase();
+            let parts = rawCmd.trim().split(/\s+/);
+            let action = parts[0].toLowerCase();
+
+            if (action === 'quit' || action === 'exit') {
+                appendTerminal('[*] Session closed by operator.', 'text-cyber-muted');
+                return;
+            }
+
+            if (action === 'db' || action === 'leak' || action === 'database') {
+                setViewMode('db');
+                appendTerminal('[+] Database view loaded.', 'text-cyber-cyan');
+                return;
+            }
+
+            if (action === 'words' || action === 'wordlist') {
+                setViewMode('words');
+                appendTerminal('[+] Candidate wordlist view loaded.', 'text-emerald-400');
+                return;
+            }
+
+            if (action === 'table') {
+                if (currentLevel === 1) {
+                    appendTerminal('[X] Rainbow tables are not applicable to Level 1.', 'text-red-400');
+                } else {
+                    setViewMode('table');
+                    appendTerminal('[+] Rainbow lookup table view loaded.', 'text-yellow-400');
+                }
+                return;
+            }
+
+            if (action === 'help') {
+                printHelpGuide();
+                return;
+            }
+
+            if (action === 'answers' || action === 'key' || action === 'debug') {
+                printAnswerKeyTerminal();
+                return;
+            }
+
+            if (action === 'solve') {
+                autoSolveLevel();
+                return;
+            }
+
+            // Level 1: Search command
+            if (action === 'search') {
+                if (currentLevel !== 1) {
+                    appendTerminal("[X] 'search' is only available in Level 1. Use 'hash' for Levels 2 & 3.", 'text-red-400');
+                    return;
+                }
+                let word = parts[1];
+                if (!word) {
+                    appendTerminal('[X] Invalid format. Use: search <word>', 'text-red-400');
+                    return;
+                }
+                let b64 = btoa(word);
+                appendTerminal(`[*] Scanning DB for Plaintext: '${word}'`, 'text-cyber-muted');
+                appendTerminal(`[*] Scanning DB for Base64:    '${b64}'`, 'text-cyber-muted');
+                
+                let found = false;
+                for (let [user, info] of Object.entries(l1State.dbData)) {
+                    if (info.stored_value === word || info.stored_value === b64) {
+                        appendTerminal(`[!] MATCH FOUND! User '${user}' is using password '${word}' (Stored as ${info.type})`, 'text-emerald-400');
+                        found = true;
+                    }
+                }
+                if (!found) appendTerminal(`[-] No users found using password '${word}'.`, 'text-yellow-400');
+                return;
+            }
+
+            // Level 1: Decode command
+            if (action === 'decode') {
+                if (currentLevel !== 1) {
+                    appendTerminal("[X] 'decode' is only available in Level 1.", 'text-red-400');
+                    return;
+                }
+                let b64Str = parts[1];
+                if (!b64Str) {
+                    appendTerminal('[X] Invalid format. Use: decode <string>', 'text-red-400');
+                    return;
+                }
+                try {
+                    let decoded = atob(b64Str);
+                    appendTerminal(`[+] Base64 Decoded Result: '${decoded}'`, 'text-emerald-400');
+                } catch(err) {
+                    appendTerminal('[X] Error: Invalid Base64 string.', 'text-red-400');
+                }
+                return;
+            }
+
+            // Level 2 & 3: Hash command
+            if (action === 'hash') {
+                if (currentLevel === 1) {
+                    appendTerminal("[X] 'hash' testing is for Level 2 and Level 3.", 'text-red-400');
+                    return;
+                }
+                if (currentLevel === 2) {
+                    let algo = parts[1] ? parts[1].toLowerCase() : '';
+                    let word = parts.slice(2).join(' ');
+                    if (!algo || !word) {
+                        appendTerminal('[X] Invalid format. Use: hash <algo> <word>', 'text-red-400');
+                        return;
+                    }
+                    let res = hashString(algo, word);
+                    appendTerminal(`[*] [${algo.toUpperCase()}] Hash of '${word}':\n    ${res}`, 'text-cyan-400');
+                } else if (currentLevel === 3) {
+                    let algo = parts[1] ? parts[1].toLowerCase() : '';
+                    let salt = parts[2] ? parts[2] : '';
+                    let word = parts.slice(3).join(' ');
+                    if (!algo || !salt || !word) {
+                        appendTerminal('[X] Invalid format. Use: hash <algo> <salt> <word>', 'text-red-400');
+                        return;
+                    }
+                    let res = hashString(algo, salt + word);
+                    appendTerminal(`[*] [${algo.toUpperCase()}] Hash of '${salt}' + '${word}':\n    ${res}`, 'text-cyan-400');
+                }
+                return;
+            }
+
+            // Submission format: username:password
+            if (rawCmd.includes(':')) {
+                let [userPart, passPart] = rawCmd.split(':', 2);
+                let targetUser = userPart.trim().toLowerCase();
+                let passInput = passPart.trim();
+                processSubmission(targetUser, passInput);
+                return;
+            }
+
+            appendTerminal(`[X] Unknown command '${rawCmd}'. Type 'help' for instructions.`, 'text-red-400');
+        }
+
+        // --- Credential Submission Processing ---
+        function processSubmission(user, password) {
+            if (currentLevel === 1) {
+                if (!l1State.targets[user]) {
+                    appendTerminal('[X] Unknown username.', 'text-red-400');
+                    return;
+                }
+                if (l1State.recovered.has(user)) {
+                    appendTerminal(`[!] You already compromised ${user}'s account!`, 'text-yellow-400');
+                    return;
+                }
+                if (password === l1State.targets[user]) {
+                    l1State.recovered.add(user);
+                    appendTerminal(`[+] SUCCESS! ${user}'s account compromised. Progress: ${l1State.recovered.size}/10`, 'text-emerald-400');
+                    renderCurrentView();
+                    updateBadges();
+                    checkLevelCompletion();
+                } else {
+                    appendTerminal(`[X] ACCESS DENIED. Incorrect password for ${user}.`, 'text-red-400');
+                }
+            } else if (currentLevel === 2) {
+                if (!l2State.targets[user]) {
+                    appendTerminal('[X] Unknown username.', 'text-red-400');
+                    return;
+                }
+                if (l2State.recovered[user]) {
+                    appendTerminal(`[!] You already recovered ${user}'s password!`, 'text-yellow-400');
+                    return;
+                }
+                let info = l2State.dbData[user];
+                let guessHash = hashString(info.algo, password);
+                if (guessHash === info.hash) {
+                    l2State.recovered[user] = password;
+                    appendTerminal(`[+] SUCCESS! Cracked ${user}'s password: '${password}' (Algo: ${info.algo.toUpperCase()})`, 'text-emerald-400');
+                    
+                    // Check equality leaks
+                    let matches = Object.keys(l2State.dbData).filter(u => l2State.dbData[u].hash === info.hash && !l2State.recovered[u]);
+                    if (matches.length > 0) {
+                        appendTerminal(`[!] Equality Leak Detected! User(s) ${matches.join(', ')} share this exact same hash!`, 'text-yellow-400');
+                    }
+                    renderCurrentView();
+                    updateBadges();
+                    checkLevelCompletion();
+                } else {
+                    appendTerminal(`[X] Incorrect password for ${user}. Hash mismatch.`, 'text-red-400');
+                }
+            } else if (currentLevel === 3) {
+                if (!l3State.targets[user]) {
+                    appendTerminal('[X] Unknown username.', 'text-red-400');
+                    return;
+                }
+                if (l3State.recovered[user]) {
+                    appendTerminal(`[!] You already recovered ${user}'s password!`, 'text-yellow-400');
+                    return;
+                }
+                let info = l3State.dbData[user];
+                let guessHash = hashString(info.algo, info.salt + password);
+                if (guessHash === info.hash) {
+                    l3State.recovered[user] = password;
+                    appendTerminal(`[+] SUCCESS! Cracked ${user}'s password: '${password}'`, 'text-emerald-400');
+                    renderCurrentView();
+                    updateBadges();
+                    checkLevelCompletion();
+                } else {
+                    appendTerminal(`[X] Incorrect password for ${user}. Use 'hash ${info.algo} ${info.salt} <word>' to test candidates!`, 'text-red-400');
+                }
+            }
+        }
+
+        // --- Win Condition & Completion ---
+        function checkLevelCompletion() {
+            let completed = false;
+            if (currentLevel === 1 && l1State.recovered.size >= 10) completed = true;
+            if (currentLevel === 2 && Object.keys(l2State.recovered).length >= 10) completed = true;
+            if (currentLevel === 3 && Object.keys(l3State.recovered).length >= 5) completed = true;
+
+            if (completed) {
+                let modal = document.getElementById('success-modal');
+                let title = document.getElementById('success-modal-title');
+                let desc = document.getElementById('success-modal-desc');
+                let btnNext = document.getElementById('btn-next-level');
+
+                title.innerText = `LEVEL ${currentLevel} COMPLETED!`;
+                desc.innerText = `Great job! You successfully mastered Module ${currentLevel} and cracked the target accounts.`;
+                
+                if (currentLevel === 3) {
+                    btnNext.style.display = 'none';
+                    desc.innerText += " You have completed all 3 modules in the training suite!";
+                } else {
+                    btnNext.style.display = 'block';
+                }
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+        }
+
+        function advanceNextLevel() {
+            closeSuccessModal();
+            if (currentLevel < 3) switchLevel(currentLevel + 1);
+        }
+
+        // --- Terminal Helper Output Functions ---
+        function appendTerminal(text, colorClass = 'text-slate-300') {
+            let term = document.getElementById('terminal-output');
+            let div = document.createElement('div');
+            div.className = colorClass;
+            div.innerText = text;
+            term.appendChild(div);
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-output').innerHTML = '<div class="text-cyber-cyan">[*] Terminal cleared.</div>';
+        }
+
+        function printHelpGuide() {
+            appendTerminal('=== SEC-OPS TERMINAL COMMAND GUIDE ===', 'text-yellow-400 font-bold');
+            appendTerminal('• db / leak         -> View database records', 'text-slate-300');
+            appendTerminal('• words             -> View candidate wordlists', 'text-slate-300');
+            appendTerminal('• table             -> View rainbow tables (L2/L3)', 'text-slate-300');
+            if (currentLevel === 1) {
+                appendTerminal('• search <word>     -> Scan DB for plaintext/Base64', 'text-slate-300');
+                appendTerminal('• decode <string>   -> Manually decode Base64', 'text-slate-300');
+            } else {
+                appendTerminal('• hash <algo> <w>   -> Test hash (Level 2)', 'text-slate-300');
+                appendTerminal('• hash <a> <s> <w>  -> Test salted hash (Level 3)', 'text-slate-300');
+            }
+            appendTerminal('• user:password     -> Submit crack attempt', 'text-slate-300');
+            appendTerminal('• help              -> Show this guide', 'text-slate-300');
+            appendTerminal('=======================================', 'text-yellow-400 font-bold');
+        }
+
+        function printAnswerKeyTerminal() {
+            appendTerminal('=== [DEBUG] ANSWER SHEET ===', 'text-cyber-yellow font-bold');
+            if (currentLevel === 1) {
+                for (let [u, pwd] of Object.entries(l1State.targets)) {
+                    appendTerminal(`  ${u} : ${pwd} (${l1State.dbData[u].type})`, 'text-cyan-400');
+                }
+            } else if (currentLevel === 2) {
+                for (let [u, pwd] of Object.entries(l2State.targets)) {
+                    appendTerminal(`  ${u} : ${pwd} (${l2State.dbData[u].algo.toUpperCase()})`, 'text-cyan-400');
+                }
+            } else if (currentLevel === 3) {
+                for (let [u, pwd] of Object.entries(l3State.targets)) {
+                    appendTerminal(`  ${u} : ${pwd} (Salt: ${l3State.dbData[u].salt} | ${l3State.dbData[u].algo.toUpperCase()})`, 'text-cyan-400');
+                }
+            }
+            appendTerminal('============================', 'text-cyber-yellow font-bold');
+        }
+
+        function autoSolveLevel() {
+            if (currentLevel === 1) {
+                for (let [u, pwd] of Object.entries(l1State.targets)) l1State.recovered.add(u);
+                appendTerminal('[+] [DEBUG] Auto-solved Level 1!', 'text-emerald-400');
+            } else if (currentLevel === 2) {
+                for (let [u, pwd] of Object.entries(l2State.targets)) l2State.recovered[u] = pwd;
+                appendTerminal('[+] [DEBUG] Auto-solved Level 2!', 'text-emerald-400');
+            } else if (currentLevel === 3) {
+                let count = 0;
+                for (let [u, pwd] of Object.entries(l3State.targets)) {
+                    l3State.recovered[u] = pwd;
+                    count++;
+                    if (count >= 5) break;
+                }
+                appendTerminal('[+] [DEBUG] Auto-solved Level 3 (5 accounts)!', 'text-emerald-400');
+            }
+            renderCurrentView();
+            updateBadges();
+            checkLevelCompletion();
+        }
+
+        // --- Instructor Drawer Functions ---
+        function toggleDebugDrawer() {
+            let drawer = document.getElementById('debug-drawer');
+            let content = document.getElementById('debug-drawer-content');
+            
+            if (drawer.classList.contains('hidden')) {
+                // Populate content
+                let html = `<div class="p-3 bg-cyber-bg rounded-lg border border-cyber-border text-slate-300">`;
+                html += `<div class="font-bold text-cyber-yellow mb-2">ACTIVE MODULE: LEVEL ${currentLevel} ANSWER KEY</div>`;
+                html += `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-cyber-border text-cyber-muted"><th class="py-1 px-2">USER</th><th class="py-1 px-2">PASSWORD</th><th class="py-1 px-2">METADATA</th><th class="py-1 px-2">COPY-PASTE SUBMISSION</th></tr></thead><tbody>`;
+
+                if (currentLevel === 1) {
+                    for (let [u, pwd] of Object.entries(l1State.targets)) {
+                        html += `<tr class="border-b border-cyber-border/40"><td class="py-1 px-2 font-bold text-white">${u}</td><td class="py-1 px-2 text-cyan-400">${pwd}</td><td class="py-1 px-2 text-slate-400">${l1State.dbData[u].type}</td><td class="py-1 px-2 font-mono text-emerald-400">${u}:${pwd}</td></tr>`;
+                    }
+                } else if (currentLevel === 2) {
+                    for (let [u, pwd] of Object.entries(l2State.targets)) {
+                        html += `<tr class="border-b border-cyber-border/40"><td class="py-1 px-2 font-bold text-white">${u}</td><td class="py-1 px-2 text-cyan-400">${pwd}</td><td class="py-1 px-2 text-yellow-400">${l2State.dbData[u].algo.toUpperCase()}</td><td class="py-1 px-2 font-mono text-emerald-400">${u}:${pwd}</td></tr>`;
+                    }
+                } else if (currentLevel === 3) {
+                    for (let [u, pwd] of Object.entries(l3State.targets)) {
+                        html += `<tr class="border-b border-cyber-border/40"><td class="py-1 px-2 font-bold text-white">${u}</td><td class="py-1 px-2 text-cyan-400">${pwd}</td><td class="py-1 px-2 text-purple-400">Salt: ${l3State.dbData[u].salt} (${l3State.dbData[u].algo.toUpperCase()})</td><td class="py-1 px-2 font-mono text-emerald-400">${u}:${pwd}</td></tr>`;
+                    }
+                }
+                html += `</tbody></table></div>`;
+                content.innerHTML = html;
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
